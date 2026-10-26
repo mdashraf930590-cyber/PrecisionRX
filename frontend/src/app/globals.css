@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+/* ─── Sky Blue Solid Theme Tokens (No Transparency) ──────────────────────── */
+:root {
+  --bg-primary: #E0F2FE;
+  --bg-secondary: #F0F9FF;
+  --bg-card: #FFFFFF;
+  --bg-card-subtle: #F0F9FF;
+  --border-subtle: #BAE6FD;
+  --border-medium: #7DD3FC;
+  --border-accent: #0284C7;
+
+  --color-primary: #0284C7;
+  --color-primary-hover: #0369A1;
+  --color-primary-light: #E0F2FE;
+
+  --color-success: #059669;
+  --color-success-light: #D1FAE5;
+  --color-warning: #D97706;
+  --color-warning-light: #FEF3C7;
+  --color-danger: #DC2626;
+  --color-danger-light: #FEE2E2;
+
+  --text-primary: #0C4A6E;
+  --text-secondary: #0369A1;
+  --text-muted: #64748B;
+  --text-dark: #0F172A;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  background-color: #E0F2FE;
+  color: #0F172A;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 7px; height: 7px; }
+::-webkit-scrollbar-track { background: #E0F2FE; }
+::-webkit-scrollbar-thumb { background: #7DD3FC; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #0284C7; }
+
+/* ─── Badges (Solid & Crisp) ─────────────────────────────────────────────── */
+.risk-low {
+  background-color: #D1FAE5 !important;
+  color: #065F46 !important;
+  border: 1px solid #6EE7B7 !important;
+}
+.risk-medium {
+  background-color: #FEF3C7 !important;
+  color: #92400E !important;
+  border: 1px solid #FCD34D !important;
+}
+.risk-high {
+  background-color: #FFEDD5 !important;
+  color: #9A3412 !important;
+  border: 1px solid #FDBA74 !important;
+}
+.risk-critical {
+  background-color: #FEE2E2 !important;
+  color: #991B1B !important;
+  border: 1px solid #FCA5A5 !important;
+}
+
+/* ─── Confidence Bar ──────────────────────────────────────────────────────── */
+.confidence-bar {
+  height: 8px;
+  border-radius: 4px;
+  background-color: #BAE6FD;
+  overflow: hidden;
+}
+
+.confidence-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}

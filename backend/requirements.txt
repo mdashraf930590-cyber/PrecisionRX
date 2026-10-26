@@ -1,0 +1,76 @@
+# FastAPI core
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+python-multipart==0.0.9
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+email-validator==2.1.1
+
+# Database
+sqlalchemy==2.0.30
+asyncpg==0.29.0
+psycopg2-binary==2.9.9
+alembic==1.13.1
+motor==3.4.0       # async MongoDB
+pymongo==4.7.2
+redis==5.0.4
+aioredis==2.0.1
+
+# Task queue
+celery==5.4.0
+kombu==5.3.5
+
+# Pydantic + settings
+pydantic==2.7.1
+pydantic-settings==2.2.1
+pydantic[email]==2.7.1
+
+# HTTP client
+httpx==0.27.0
+aiohttp==3.9.5
+
+# ML Core
+numpy==1.26.4
+pandas==2.2.2
+scipy==1.13.0
+scikit-learn==1.4.2
+xgboost==2.0.3
+lightgbm==4.3.0
+catboost==1.2.5
+optuna==3.6.1
+shap==0.45.1
+
+# Deep Learning
+torch==2.3.0
+transformers==4.41.1
+tokenizers==0.19.1
+
+# MLOps
+mlflow==2.13.0
+evidently==0.4.28
+
+# Federated Learning
+flwr==1.8.0
+
+# NLP / Bio
+spacy==3.7.4
+pyvcf3==1.0.3
+
+# Data formats
+pyarrow==16.1.0
+fastparquet==2024.5.0
+
+# Observability
+prometheus-client==0.20.0
+opentelemetry-sdk==1.24.0
+
+# Testing
+pytest==8.2.0
+pytest-asyncio==0.23.7
+httpx==0.27.0
+factory-boy==3.3.0
+faker==25.2.0
+
+# Security
+cryptography==42.0.7
+python-dotenv==1.0.1

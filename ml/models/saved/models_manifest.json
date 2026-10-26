@@ -1,0 +1,51 @@
+{
+  "training_timestamp": "2026-10-26T10:14:41.844675+00:00",
+  "dataset_source": "ClinPGx / PharmGKB (clinicalVariants.tsv)",
+  "models": {
+    "model_a_recommender": {
+      "algorithm": "XGBoost Multi-Label Classifier",
+      "drugs": [
+        "warfarin",
+        "clopidogrel",
+        "simvastatin",
+        "codeine",
+        "tamoxifen",
+        "tacrolimus",
+        "fluorouracil",
+        "capecitabine",
+        "metformin",
+        "lisinopril"
+      ],
+      "mean_validation_auc": 0.5459799999999999,
+      "artifact_file": "recommender_xgboost.joblib"
+    },
+    "model_b_adr_predictor": {
+      "algorithm": "LightGBM / GradientBoosting Binary Classifier",
+      "target_event": "Adverse Drug Reaction / Toxicity",
+      "validation_auc": 1.0,
+      "validation_accuracy": 1.0,
+      "artifact_file": "adr_predictor.joblib"
+    },
+    "model_c_dosage_optimizer": {
+      "algorithm": "CatBoost / GradientBoosting Regressor",
+      "target": "Recommended Titrated Dose (mg)",
+      "mae_mg": 11.15,
+      "artifact_file": "dosage_optimizer.joblib"
+    },
+    "model_d_adherence_lstm": {
+      "algorithm": "Bi-Directional LSTM Attention Network (PyTorch)",
+      "sequence_length": 90,
+      "features": [
+        "HR",
+        "HRV",
+        "SpO2",
+        "steps",
+        "sleep",
+        "refill_flag",
+        "app_open",
+        "dose_taken"
+      ],
+      "status": "Online"
+    }
+  }
+}
