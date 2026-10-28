@@ -66,12 +66,133 @@ const WEARABLE_DATA = Array.from({ length: 30 }, (_, i) => ({
   sleep: 5.5 + Math.random() * 2,
 }));
 
+interface PrescriptionOrder {
+  drug: string;
+  dose: string;
+  frequency: string;
+  instructions: string;
+  notes: string;
+  prescriber: string;
+  npi: string;
+  timestamp: string;
+}
+
+const DEFAULT_PRESCRIPTION: PrescriptionOrder = {
+  drug: "Metformin HCl",
+  dose: "500mg",
+  frequency: "Twice Daily (BID)",
+  instructions: "Titrate to 1000mg BID at week 4 based on eGFR stability",
+  notes: "Starting dosage modified based on patient's eGFR 42 (Stage 3 CKD) and CYP2D6 metabolizer profile. Scheduled 3-week renal function re-check.",
+  prescriber: "Dr. Rachel Kim, MD",
+  npi: "1892048123",
+  timestamp: "Oct 28, 2026 · 11:20 AM",
+};
+
 // ─── AI Recommendation Panel (Solid Sky Blue Theme, No Transparency) ───────
 function AIRecommendationPanel() {
-  const [status, setStatus] = useState<"pending" | "approved" | "rejected">("pending");
+  const [status, setStatus] = useState<"pending" | "approved" | "modified_approved" | "rejected">("pending");
+  const [prescription, setPrescription] = useState<PrescriptionOrder>(DEFAULT_PRESCRIPTION);
+  const [isModifyModalOpen, setIsModifyModalOpen] = useState(false);
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState("Patient reported past intolerance to biguanides");
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Form draft state for Modify Modal
+  const [formDrug, setFormDrug] = useState(prescription.drug);
+  const [formDose, setFormDose] = useState(prescription.dose);
+  const [formFrequency, setFormFrequency] = useState(prescription.frequency);
+  const [formInstructions, setFormInstructions] = useState(prescription.instructions);
+  const [formNotes, setFormNotes] = useState(prescription.notes);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 4500);
+  };
+
+  const handleOpenModifyModal = () => {
+    setFormDrug(prescription.drug);
+    setFormDose(prescription.dose);
+    setFormFrequency(prescription.frequency);
+    setFormInstructions(prescription.instructions);
+    setFormNotes(prescription.notes);
+    setIsModifyModalOpen(true);
+  };
+
+  const handleSaveModification = (e: React.FormEvent) => {
+    e.preventDefault();
+    const now = new Date();
+    const formattedTime = now.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }) + " · " + now.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    const updated: PrescriptionOrder = {
+      drug: formDrug,
+      dose: formDose,
+      frequency: formFrequency,
+      instructions: formInstructions,
+      notes: formNotes,
+      prescriber: "Dr. Rachel Kim, MD",
+      npi: "1892048123",
+      timestamp: formattedTime,
+    };
+
+    setPrescription(updated);
+    setStatus("modified_approved");
+    setIsModifyModalOpen(false);
+    showToast(`Order successfully modified & approved: ${updated.drug} ${updated.dose} (${updated.frequency})`);
+  };
+
+  const handleDirectApprove = () => {
+    const now = new Date();
+    const formattedTime = now.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }) + " · " + now.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    setPrescription((prev) => ({
+      ...prev,
+      timestamp: formattedTime,
+    }));
+    setStatus("approved");
+    showToast(`AI Recommendation for ${prescription.drug} 500mg approved by Dr. Rachel Kim, MD`);
+  };
+
+  const handleConfirmReject = () => {
+    setStatus("rejected");
+    setIsRejectModalOpen(false);
+    showToast("AI Recommendation declined by prescriber");
+  };
+
+  const handleResetToDefault = () => {
+    setPrescription(DEFAULT_PRESCRIPTION);
+    setStatus("pending");
+    showToast("Recommendation restored to original AI model proposal");
+  };
 
   return (
     <div className="bg-white rounded-3xl border-2 border-sky-300 p-6 shadow-md sticky top-20 space-y-4">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="p-3 rounded-xl bg-sky-900 text-white text-xs font-bold border-2 border-sky-500 shadow-lg flex items-center justify-between gap-2 animate-in fade-in slide-in-from-top-2">
+          <div className="flex items-center gap-2">
+            <Check size={14} className="text-emerald-400 shrink-0" />
+            <span>{toastMessage}</span>
+          </div>
+          <button onClick={() => setToastMessage(null)} className="text-sky-300 hover:text-white">
+            <X size={13} />
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between pb-3 border-b-2 border-sky-100">
         <div className="flex items-center gap-2">
@@ -85,12 +206,81 @@ function AIRecommendationPanel() {
         </span>
       </div>
 
-      {/* Drug Card */}
-      <div className="p-4 rounded-2xl bg-sky-50 border-2 border-sky-200 shadow-xs">
-        <div className="text-[11px] font-black text-sky-800 mb-0.5 uppercase tracking-wider">Recommended Drug</div>
-        <div className="text-xl font-black text-slate-900">Metformin HCl</div>
-        <div className="text-xs font-black text-sky-700">500mg · Twice Daily (BID)</div>
-        <div className="text-[11px] text-slate-600 font-medium mt-1">Titrate to 1000mg BID at week 4 based on eGFR stability</div>
+      {/* Drug Card (Dynamic State-Aware) */}
+      <div
+        className={`p-4 rounded-2xl border-2 shadow-xs transition-colors ${
+          status === "modified_approved"
+            ? "bg-sky-50 border-sky-400"
+            : status === "approved"
+            ? "bg-emerald-50 border-emerald-400"
+            : status === "rejected"
+            ? "bg-rose-50 border-rose-300"
+            : "bg-sky-50 border-sky-200"
+        }`}
+      >
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-[11px] font-black text-sky-800 uppercase tracking-wider">
+            {status === "modified_approved"
+              ? "Modified Clinical Prescription"
+              : status === "approved"
+              ? "Approved Clinical Prescription"
+              : status === "rejected"
+              ? "Declined Prescription"
+              : "Recommended Drug"}
+          </span>
+          {status === "modified_approved" && (
+            <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-sky-600 text-white flex items-center gap-1">
+              <Check size={11} /> Modified &amp; Approved
+            </span>
+          )}
+          {status === "approved" && (
+            <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-emerald-600 text-white flex items-center gap-1">
+              <Check size={11} /> Approved
+            </span>
+          )}
+          {status === "rejected" && (
+            <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-rose-600 text-white flex items-center gap-1">
+              <X size={11} /> Rejected
+            </span>
+          )}
+        </div>
+
+        <div className="text-xl font-black text-slate-900">{prescription.drug}</div>
+        <div className="text-xs font-black text-sky-700">
+          {prescription.dose} · {prescription.frequency}
+        </div>
+        <div className="text-[11px] text-slate-600 font-medium mt-1">
+          {prescription.instructions}
+        </div>
+
+        {/* Clinician Modification Note */}
+        {status === "modified_approved" && (
+          <div className="mt-3 p-2.5 rounded-xl bg-white border border-sky-300 text-xs">
+            <div className="text-[10px] font-black uppercase text-sky-800 tracking-wider mb-0.5">
+              Attending Physician Rationale:
+            </div>
+            <p className="text-slate-800 font-medium italic">&ldquo;{prescription.notes}&rdquo;</p>
+            <div className="text-[10px] text-sky-700 font-bold mt-1.5 pt-1 border-t border-sky-100 flex items-center justify-between">
+              <span>Prescriber: {prescription.prescriber}</span>
+              <span>{prescription.timestamp}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Approval Signature */}
+        {status === "approved" && (
+          <div className="mt-2.5 pt-2 border-t border-emerald-200 text-[10px] font-bold text-emerald-800 flex items-center justify-between">
+            <span>Signed: Dr. Rachel Kim, MD (NPI #{prescription.npi})</span>
+            <span>{prescription.timestamp}</span>
+          </div>
+        )}
+
+        {/* Rejection Note */}
+        {status === "rejected" && (
+          <div className="mt-2.5 p-2 rounded-lg bg-white border border-rose-200 text-xs text-rose-800">
+            <span className="font-bold">Reason:</span> {rejectionReason}
+          </div>
+        )}
       </div>
 
       {/* Confidence Score */}
@@ -162,24 +352,278 @@ function AIRecommendationPanel() {
       {/* Doctor Actions */}
       {status === "pending" ? (
         <div className="grid grid-cols-2 gap-2 pt-1">
-          <button onClick={() => setStatus("approved")} className="btn-success flex items-center justify-center gap-1 text-xs py-2.5">
+          <button
+            id="rec-approve-btn"
+            onClick={handleDirectApprove}
+            className="btn-success flex items-center justify-center gap-1.5 text-xs py-2.5 font-black"
+          >
             <Check size={14} /> Approve
           </button>
-          <button onClick={() => setStatus("rejected")} className="btn-danger flex items-center justify-center gap-1 text-xs py-2.5">
+          <button
+            id="rec-reject-btn"
+            onClick={() => setIsRejectModalOpen(true)}
+            className="btn-danger flex items-center justify-center gap-1.5 text-xs py-2.5 font-black"
+          >
             <X size={14} /> Reject
           </button>
-          <button className="btn-ghost col-span-2 flex items-center justify-center gap-1 text-xs py-2.5">
-            <Edit size={13} /> Modify &amp; Approve
+          <button
+            id="rec-modify-btn"
+            onClick={handleOpenModifyModal}
+            className="btn-ghost col-span-2 flex items-center justify-center gap-1.5 text-xs py-2.5 font-black bg-sky-100 text-sky-900 border-2 border-sky-300 hover:bg-sky-200"
+          >
+            <Edit size={14} className="text-sky-700" /> Modify &amp; Approve
           </button>
         </div>
       ) : (
-        <div
-          className={`flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-black border-2 ${
-            status === "approved" ? "bg-emerald-50 text-emerald-800 border-emerald-300" : "bg-rose-50 text-rose-800 border-rose-300"
-          }`}
-        >
-          {status === "approved" ? <Check size={16} /> : <X size={16} />}
-          <span>{status === "approved" ? "Recommendation Approved" : "Recommendation Rejected"}</span>
+        <div className="space-y-2 pt-1">
+          <div
+            className={`flex items-center justify-center gap-2 py-3 rounded-xl text-xs font-black border-2 ${
+              status === "modified_approved"
+                ? "bg-sky-50 text-sky-900 border-sky-300"
+                : status === "approved"
+                ? "bg-emerald-50 text-emerald-800 border-emerald-300"
+                : "bg-rose-50 text-rose-800 border-rose-300"
+            }`}
+          >
+            {status === "modified_approved" && <Check size={16} className="text-sky-600" />}
+            {status === "approved" && <Check size={16} className="text-emerald-600" />}
+            {status === "rejected" && <X size={16} className="text-rose-600" />}
+            <span>
+              {status === "modified_approved"
+                ? "Modified Order Approved & Signed"
+                : status === "approved"
+                ? "Recommendation Approved"
+                : "Recommendation Declined"}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={handleOpenModifyModal}
+              className="py-2 px-3 rounded-xl bg-white border-2 border-sky-300 text-sky-800 hover:bg-sky-50 text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs"
+            >
+              <Edit size={13} /> {status === "modified_approved" ? "Edit Order" : "Modify Order"}
+            </button>
+            <button
+              onClick={handleResetToDefault}
+              className="py-2 px-3 rounded-xl bg-white border-2 border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs"
+            >
+              Reset to AI Default
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Modify & Approve Modal Dialog ─────────────────────────────────── */}
+      {isModifyModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white rounded-3xl border-3 border-sky-400 shadow-2xl max-w-xl w-full p-6 sm:p-7 space-y-5 max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex items-start justify-between pb-3 border-b-2 border-sky-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-sky-600 text-white flex items-center justify-center font-bold shadow-xs">
+                  <Edit size={20} />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-slate-900">Modify &amp; Approve Clinical Order</h3>
+                  <p className="text-xs text-sky-800 font-bold">
+                    Patient: Margaret Johnson · MRN-2024-001 · eGFR 42 (Stage 3 CKD)
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsModifyModalOpen(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Modal Form */}
+            <form onSubmit={handleSaveModification} className="space-y-4">
+              {/* Row 1: Drug & Dose */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-black text-sky-900 mb-1">
+                    Select Medication
+                  </label>
+                  <select
+                    value={formDrug}
+                    onChange={(e) => setFormDrug(e.target.value)}
+                    className="w-full p-2.5 rounded-xl border-2 border-sky-200 bg-sky-50 text-xs font-bold text-slate-900 focus:outline-none focus:border-sky-500"
+                  >
+                    <option value="Metformin HCl">Metformin HCl (Biguanide)</option>
+                    <option value="Sitagliptin (Januvia)">Sitagliptin / Januvia (DPP-4 Inhibitor)</option>
+                    <option value="Empagliflozin (Jardiance)">Empagliflozin / Jardiance (SGLT2 Inhibitor)</option>
+                    <option value="Glipizide">Glipizide (Sulfonylurea)</option>
+                    <option value="Linagliptin (Tradjenta)">Linagliptin / Tradjenta (Hepatic Elimination)</option>
+                    <option value="Insulin Glargine">Insulin Glargine (Basal Insulin)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-black text-sky-900 mb-1">
+                    Dosage Strength
+                  </label>
+                  <select
+                    value={formDose}
+                    onChange={(e) => setFormDose(e.target.value)}
+                    className="w-full p-2.5 rounded-xl border-2 border-sky-200 bg-sky-50 text-xs font-bold text-slate-900 focus:outline-none focus:border-sky-500"
+                  >
+                    <option value="250mg">250mg (Renal Starting Dose)</option>
+                    <option value="500mg">500mg (Standard Starting Dose)</option>
+                    <option value="750mg">750mg (Intermediate Titration)</option>
+                    <option value="850mg">850mg (Standard Maintenance)</option>
+                    <option value="1000mg">1000mg (Maximum Renal Capped Dose)</option>
+                    <option value="25mg">25mg (Renal Adjusted Dose)</option>
+                    <option value="50mg">50mg (Standard DPP-4 Dose)</option>
+                    <option value="10mg">10mg (Starting SGLT2 Dose)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Row 2: Frequency & Administration */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-black text-sky-900 mb-1">
+                    Frequency / Schedule
+                  </label>
+                  <select
+                    value={formFrequency}
+                    onChange={(e) => setFormFrequency(e.target.value)}
+                    className="w-full p-2.5 rounded-xl border-2 border-sky-200 bg-sky-50 text-xs font-bold text-slate-900 focus:outline-none focus:border-sky-500"
+                  >
+                    <option value="Twice Daily (BID)">Twice Daily (BID) with meals</option>
+                    <option value="Once Daily (QD)">Once Daily (QD) with breakfast</option>
+                    <option value="Three Times Daily (TID)">Three Times Daily (TID) with meals</option>
+                    <option value="At Bedtime (QHS)">At Bedtime (QHS)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-black text-sky-900 mb-1">
+                    Genomic Safety Check
+                  </label>
+                  <div className="p-2 rounded-xl bg-emerald-50 border border-emerald-300 text-[11px] font-bold text-emerald-900 flex items-center gap-1.5 h-[38px]">
+                    <Check size={13} className="text-emerald-600 shrink-0" />
+                    <span>CPIC Level A Verified · No Contraindications</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Row 3: Titration Instructions */}
+              <div>
+                <label className="block text-xs font-black text-sky-900 mb-1">
+                  Titration &amp; Nurse/Pharmacist Instructions
+                </label>
+                <input
+                  type="text"
+                  value={formInstructions}
+                  onChange={(e) => setFormInstructions(e.target.value)}
+                  className="w-full p-2.5 rounded-xl border-2 border-sky-200 bg-sky-50 text-xs font-medium text-slate-900 focus:outline-none focus:border-sky-500"
+                  placeholder="e.g. Titrate to 1000mg BID at week 4 based on eGFR stability"
+                />
+              </div>
+
+              {/* Row 4: Clinical Justification Notes */}
+              <div>
+                <label className="block text-xs font-black text-sky-900 mb-1">
+                  Prescriber Clinical Rationale (Saved to EHR Audit Log)
+                </label>
+                <textarea
+                  rows={3}
+                  value={formNotes}
+                  onChange={(e) => setFormNotes(e.target.value)}
+                  className="w-full p-2.5 rounded-xl border-2 border-sky-200 bg-sky-50 text-xs font-medium text-slate-900 focus:outline-none focus:border-sky-500 leading-relaxed"
+                  placeholder="Document why dosage or drug was modified from the AI baseline..."
+                />
+              </div>
+
+              {/* Row 5: Prescriber Sign-off Banner */}
+              <div className="p-3 rounded-xl bg-sky-50 border-2 border-sky-200 flex items-center justify-between text-xs">
+                <div>
+                  <div className="font-black text-slate-900">Dr. Rachel Kim, MD</div>
+                  <div className="text-[11px] text-sky-800 font-medium">Attending Physician · NPI #1892048123 · Lic #NY-MD-99412</div>
+                </div>
+                <span className="text-[10px] font-black px-2 py-1 rounded bg-sky-600 text-white uppercase tracking-wider">
+                  Digital Sign-off
+                </span>
+              </div>
+
+              {/* Modal Buttons */}
+              <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-sky-100">
+                <button
+                  type="button"
+                  onClick={() => setIsModifyModalOpen(false)}
+                  className="px-4 py-2.5 rounded-xl border-2 border-slate-300 text-slate-700 hover:bg-slate-100 text-xs font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-black shadow-md flex items-center gap-1.5 border border-sky-700"
+                >
+                  <Check size={15} /> Confirm &amp; Sign Modified Order
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Reject Modal Dialog ───────────────────────────────────────────── */}
+      {isRejectModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white rounded-3xl border-3 border-rose-400 shadow-2xl max-w-md w-full p-6 space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-rose-100">
+              <div className="flex items-center gap-2 text-rose-700">
+                <AlertTriangle size={18} />
+                <h3 className="text-sm font-black text-slate-900">Decline AI Recommendation</h3>
+              </div>
+              <button
+                onClick={() => setIsRejectModalOpen(false)}
+                className="text-slate-400 hover:text-slate-700"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Please specify the clinical rationale for declining this AI dosing recommendation. This will be recorded in the hospital quality audit trail.
+            </p>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-800 mb-1">Clinical Reason</label>
+              <select
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                className="w-full p-2.5 rounded-xl border-2 border-rose-200 bg-rose-50 text-xs font-bold text-slate-900 focus:outline-none focus:border-rose-400"
+              >
+                <option value="Patient reported past intolerance to biguanides">Patient reported past intolerance to biguanides</option>
+                <option value="Active acute renal impairment concern">Active acute renal impairment concern</option>
+                <option value="Alternative therapeutic class preferred by specialist">Alternative therapeutic class preferred by specialist</option>
+                <option value="Scheduled for contrast imaging within 48h">Scheduled for contrast imaging within 48h</option>
+                <option value="Clinical judgment / Prescriber discretion">Clinical judgment / Prescriber discretion</option>
+              </select>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setIsRejectModalOpen(false)}
+                className="px-3.5 py-2 rounded-xl border border-slate-300 text-slate-700 text-xs font-bold"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmReject}
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black shadow-sm"
+              >
+                Confirm Decline
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
