@@ -1,4 +1,5 @@
 """FastAPI application factory — mounts all routers and middleware."""
+
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
@@ -15,7 +16,10 @@ from app.api.v1.endpoints.patients import router as patients_router
 from app.api.v1.endpoints.ai_recommendations import router as ai_router
 from app.api.v1.endpoints.analytics import router as analytics_router
 from app.api.v1.endpoints.clinical import (
-    genomics_router, labs_router, medications_router, wearables_router,
+    genomics_router,
+    labs_router,
+    medications_router,
+    wearables_router,
 )
 
 

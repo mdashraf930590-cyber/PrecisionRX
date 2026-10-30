@@ -1,4 +1,5 @@
 """Genomics processing service — VCF parsing and pharmacogenomic predictions."""
+
 from __future__ import annotations
 
 import io
@@ -56,15 +57,33 @@ METABOLIZER_TABLE = {
 }
 
 DRUG_PGX_PREDICTIONS = {
-    "Codeine":        {"CYP2D6_poor": "Avoid - no analgesia", "CYP2D6_ultra_rapid": "Avoid - toxicity risk"},
-    "Tamoxifen":      {"CYP2D6_poor": "Consider alternative", "CYP2D6_intermediate": "Standard dose"},
-    "Clopidogrel":    {"CYP2C19_poor": "Avoid - no activation", "CYP2C19_ultra_rapid": "Normal response"},
-    "Warfarin":       {"CYP2C9_poor": "Reduce dose significantly", "CYP2C9_intermediate": "Reduce dose"},
-    "Simvastatin":    {"SLCO1B1_risk": "High myopathy risk - use alternative"},
-    "Abacavir":       {"HLA_B_5701": "Contraindicated - hypersensitivity"},
-    "Carbamazepine":  {"HLA_B_1502": "Contraindicated - SJS risk"},
-    "Fluoxetine":     {"CYP2D6_poor": "Increase interval", "CYP2D6_ultra_rapid": "May need higher dose"},
-    "Omeprazole":     {"CYP2C19_poor": "Standard dose sufficient", "CYP2C19_ultra_rapid": "Increase dose"},
+    "Codeine": {
+        "CYP2D6_poor": "Avoid - no analgesia",
+        "CYP2D6_ultra_rapid": "Avoid - toxicity risk",
+    },
+    "Tamoxifen": {
+        "CYP2D6_poor": "Consider alternative",
+        "CYP2D6_intermediate": "Standard dose",
+    },
+    "Clopidogrel": {
+        "CYP2C19_poor": "Avoid - no activation",
+        "CYP2C19_ultra_rapid": "Normal response",
+    },
+    "Warfarin": {
+        "CYP2C9_poor": "Reduce dose significantly",
+        "CYP2C9_intermediate": "Reduce dose",
+    },
+    "Simvastatin": {"SLCO1B1_risk": "High myopathy risk - use alternative"},
+    "Abacavir": {"HLA_B_5701": "Contraindicated - hypersensitivity"},
+    "Carbamazepine": {"HLA_B_1502": "Contraindicated - SJS risk"},
+    "Fluoxetine": {
+        "CYP2D6_poor": "Increase interval",
+        "CYP2D6_ultra_rapid": "May need higher dose",
+    },
+    "Omeprazole": {
+        "CYP2C19_poor": "Standard dose sufficient",
+        "CYP2C19_ultra_rapid": "Increase dose",
+    },
 }
 
 
@@ -81,12 +100,12 @@ class GenomicsService:
 
         # Upsert genomic profile
         from sqlalchemy import select
-        result = await self.db.execute(
-            select(GenomicProfile).where(GenomicProfile.patient_id == patient.id)
-        )
+
+        result = await self.db.execute(select(GenomicProfile).where(GenomicProfile.patient_id == patient.id))
         profile = result.scalar_one_or_none()
 
         from datetime import datetime, timezone
+
         if profile:
             profile.parsed_snps = snps
             profile.metabolizer_statuses = metabolizer_statuses
@@ -131,10 +150,14 @@ class GenomicsService:
     def _rsid_to_gene(self, rsid: str) -> str:
         """Map known pharmacogenomic rsIDs to genes."""
         known = {
-            "rs1065852": "CYP2D6", "rs3892097": "CYP2D6",
-            "rs4244285": "CYP2C19", "rs4986893": "CYP2C19",
-            "rs1799853": "CYP2C9", "rs1057910": "CYP2C9",
-            "rs4149056": "SLCO1B1", "rs2740574": "CYP3A4",
+            "rs1065852": "CYP2D6",
+            "rs3892097": "CYP2D6",
+            "rs4244285": "CYP2C19",
+            "rs4986893": "CYP2C19",
+            "rs1799853": "CYP2C9",
+            "rs1057910": "CYP2C9",
+            "rs4149056": "SLCO1B1",
+            "rs2740574": "CYP3A4",
         }
         return known.get(rsid, "Unknown")
 

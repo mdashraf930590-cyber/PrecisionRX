@@ -1,4 +1,5 @@
 """Wearable data ingestion and anomaly detection service."""
+
 from __future__ import annotations
 
 import math
@@ -9,7 +10,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.db_models import WearableReading
 from app.schemas.schemas import WearableReadingCreate
-
 
 # Clinical baseline standard boundaries (metric_type -> (normal_mean, normal_std, min_cutoff, max_cutoff))
 CLINICAL_BOUNDS = {

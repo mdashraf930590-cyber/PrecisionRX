@@ -1,4 +1,5 @@
 """User management service — database operations and authentication helpers."""
+
 from __future__ import annotations
 
 from typing import Optional
@@ -16,16 +17,12 @@ class UserService:
 
     async def get_by_id(self, user_id: str) -> Optional[User]:
         """Fetch active user by primary key UUID."""
-        result = await self.db.execute(
-            select(User).where(User.id == user_id, User.is_active == True)
-        )
+        result = await self.db.execute(select(User).where(User.id == user_id, User.is_active == True))
         return result.scalar_one_or_none()
 
     async def get_by_email(self, email: str) -> Optional[User]:
         """Fetch user by unique email address."""
-        result = await self.db.execute(
-            select(User).where(User.email == email)
-        )
+        result = await self.db.execute(select(User).where(User.email == email))
         return result.scalar_one_or_none()
 
     async def create_user(self, payload: UserRegister) -> User:

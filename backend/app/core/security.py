@@ -1,4 +1,5 @@
 """Security utilities — JWT creation/verification, password hashing, RBAC."""
+
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
@@ -29,16 +30,25 @@ class UserRole(str, Enum):
 ROLE_PERMISSIONS: dict[UserRole, list[str]] = {
     UserRole.ADMIN: ["*"],  # all permissions
     UserRole.DOCTOR: [
-        "patient:read", "patient:write",
-        "ai:recommend", "ai:approve", "ai:reject",
-        "labs:read", "labs:write",
-        "medications:read", "medications:write",
-        "genomics:read", "genomics:write",
+        "patient:read",
+        "patient:write",
+        "ai:recommend",
+        "ai:approve",
+        "ai:reject",
+        "labs:read",
+        "labs:write",
+        "medications:read",
+        "medications:write",
+        "genomics:read",
+        "genomics:write",
         "analytics:read",
     ],
     UserRole.NURSE: [
-        "patient:read", "labs:read", "labs:write",
-        "medications:read", "wearables:read",
+        "patient:read",
+        "labs:read",
+        "labs:write",
+        "medications:read",
+        "wearables:read",
     ],
     UserRole.VIEWER: ["patient:read", "labs:read", "analytics:read"],
 }
@@ -56,9 +66,7 @@ def verify_password(plain: str, hashed: str) -> bool:
 # ─── JWT ──────────────────────────────────────────────────────────────────────
 def create_access_token(data: dict[str, Any], expires_delta: timedelta | None = None) -> str:
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + (
-        expires_delta or timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    )
+    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({"exp": expire, "type": "access"})
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
@@ -87,6 +95,7 @@ async def get_current_user(
     db: AsyncSession = Depends(get_db),
 ):
     from app.services.user_service import UserService  # avoid circular imports
+
     payload = decode_token(token)
     if payload.get("type") != "access":
         raise HTTPException(status_code=401, detail="Invalid token type")
@@ -101,6 +110,7 @@ async def get_current_user(
 
 def require_role(*roles: UserRole):
     """Dependency factory — raise 403 if user's role not in allowed roles."""
+
     async def _check(current_user=Depends(get_current_user)):
         if current_user.role not in [r.value for r in roles]:
             raise HTTPException(
@@ -108,15 +118,18 @@ def require_role(*roles: UserRole):
                 detail=f"Requires role: {', '.join(r.value for r in roles)}",
             )
         return current_user
+
     return _check
 
 
 def require_permission(permission: str):
     """Dependency factory — check fine-grained permission."""
+
     async def _check(current_user=Depends(get_current_user)):
         role = UserRole(current_user.role)
         allowed = ROLE_PERMISSIONS.get(role, [])
         if "*" not in allowed and permission not in allowed:
             raise HTTPException(status_code=403, detail=f"Missing permission: {permission}")
         return current_user
+
     return _check

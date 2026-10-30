@@ -1,4 +1,5 @@
 """AI recommendation and SHAP explanation endpoints."""
+
 from __future__ import annotations
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status
@@ -9,7 +10,10 @@ from app.core.database import get_db
 from app.core.security import get_current_user, require_permission
 from app.models.db_models import AIRecommendation, Patient, User
 from app.schemas.schemas import (
-    DoctorAction, RecommendationOut, RecommendationTrigger, SHAPExplanation,
+    DoctorAction,
+    RecommendationOut,
+    RecommendationTrigger,
+    SHAPExplanation,
 )
 from app.services.audit_service import AuditService
 from app.services.ml_service import MLService
@@ -17,7 +21,11 @@ from app.services.ml_service import MLService
 router = APIRouter(prefix="/ai", tags=["AI / ML Engine"])
 
 
-@router.post("/recommend/{patient_id}", response_model=RecommendationOut, status_code=status.HTTP_202_ACCEPTED)
+@router.post(
+    "/recommend/{patient_id}",
+    response_model=RecommendationOut,
+    status_code=status.HTTP_202_ACCEPTED,
+)
 async def trigger_recommendation(
     patient_id: str,
     payload: RecommendationTrigger,
@@ -101,9 +109,7 @@ async def get_explanation(
     db: AsyncSession = Depends(get_db),
 ):
     """Get SHAP-based explainability for a specific recommendation."""
-    result = await db.execute(
-        select(AIRecommendation).where(AIRecommendation.id == recommendation_id)
-    )
+    result = await db.execute(select(AIRecommendation).where(AIRecommendation.id == recommendation_id))
     rec = result.scalar_one_or_none()
     if not rec:
         raise HTTPException(status_code=404, detail="Recommendation not found")
@@ -123,9 +129,7 @@ async def get_explanation(
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 async def _get_patient_or_404(db: AsyncSession, patient_id: str) -> Patient:
-    result = await db.execute(
-        select(Patient).where(Patient.id == patient_id, Patient.is_deleted == False)
-    )
+    result = await db.execute(select(Patient).where(Patient.id == patient_id, Patient.is_deleted == False))
     patient = result.scalar_one_or_none()
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found")
@@ -157,6 +161,7 @@ async def _update_status(
     request: Request,
 ) -> AIRecommendation:
     from datetime import datetime, timezone
+
     rec.status = new_status
     rec.doctor_id = user.id
     rec.doctor_notes = payload.notes

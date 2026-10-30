@@ -1,4 +1,5 @@
 """ML inference service — orchestrates the full recommendation pipeline."""
+
 from __future__ import annotations
 
 import uuid
@@ -8,7 +9,14 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.db_models import AIRecommendation, GenomicProfile, LabResult, Medication, Patient, WearableReading
+from app.models.db_models import (
+    AIRecommendation,
+    GenomicProfile,
+    LabResult,
+    Medication,
+    Patient,
+    WearableReading,
+)
 from app.schemas.schemas import RecommendationTrigger
 
 
@@ -57,16 +65,12 @@ class MLService:
     async def _extract_features(self, patient: Patient) -> dict[str, Any]:
         """Collect all feature groups for a patient."""
         # Genomics
-        genomic_result = await self.db.execute(
-            select(GenomicProfile).where(GenomicProfile.patient_id == patient.id)
-        )
+        genomic_result = await self.db.execute(select(GenomicProfile).where(GenomicProfile.patient_id == patient.id))
         profile = genomic_result.scalar_one_or_none()
 
         # Labs (latest per LOINC)
         labs_result = await self.db.execute(
-            select(LabResult)
-            .where(LabResult.patient_id == patient.id)
-            .order_by(LabResult.collected_at.desc())
+            select(LabResult).where(LabResult.patient_id == patient.id).order_by(LabResult.collected_at.desc())
         )
         labs = labs_result.scalars().all()
 
@@ -78,10 +82,13 @@ class MLService:
 
         # Wearables (last 7 days)
         from datetime import timedelta
+
         cutoff = datetime.now(timezone.utc) - timedelta(days=7)
         wears_result = await self.db.execute(
-            select(WearableReading)
-            .where(WearableReading.patient_id == patient.id, WearableReading.recorded_at >= cutoff)
+            select(WearableReading).where(
+                WearableReading.patient_id == patient.id,
+                WearableReading.recorded_at >= cutoff,
+            )
         )
         wearables = wears_result.scalars().all()
 
@@ -114,8 +121,16 @@ class MLService:
                 "drug_interaction": False,
             },
             "alternative_drugs": [
-                {"drug": "Glipizide", "confidence": 0.71, "reason": "CYP2C9 normal metabolizer"},
-                {"drug": "Sitagliptin", "confidence": 0.65, "reason": "Renal-safe alternative"},
+                {
+                    "drug": "Glipizide",
+                    "confidence": 0.71,
+                    "reason": "CYP2C9 normal metabolizer",
+                },
+                {
+                    "drug": "Sitagliptin",
+                    "confidence": 0.65,
+                    "reason": "Renal-safe alternative",
+                },
             ],
         }
 
@@ -125,13 +140,43 @@ class MLService:
         return {
             "base_value": 0.42,
             "waterfall": [
-                {"feature": "CYP2D6_status=Poor", "value": "Poor", "shap": 0.18, "direction": "positive"},
-                {"feature": "eGFR", "value": 42.0, "shap": 0.14, "direction": "positive"},
-                {"feature": "HbA1c", "value": 8.3, "shap": 0.11, "direction": "positive"},
-                {"feature": "concurrent_metformin", "value": 1, "shap": 0.09, "direction": "positive"},
+                {
+                    "feature": "CYP2D6_status=Poor",
+                    "value": "Poor",
+                    "shap": 0.18,
+                    "direction": "positive",
+                },
+                {
+                    "feature": "eGFR",
+                    "value": 42.0,
+                    "shap": 0.14,
+                    "direction": "positive",
+                },
+                {
+                    "feature": "HbA1c",
+                    "value": 8.3,
+                    "shap": 0.11,
+                    "direction": "positive",
+                },
+                {
+                    "feature": "concurrent_metformin",
+                    "value": 1,
+                    "shap": 0.09,
+                    "direction": "positive",
+                },
                 {"feature": "age", "value": 58, "shap": -0.04, "direction": "negative"},
-                {"feature": "BMI", "value": 32.1, "shap": 0.07, "direction": "positive"},
-                {"feature": "LDL", "value": 145.0, "shap": 0.03, "direction": "positive"},
+                {
+                    "feature": "BMI",
+                    "value": 32.1,
+                    "shap": 0.07,
+                    "direction": "positive",
+                },
+                {
+                    "feature": "LDL",
+                    "value": 145.0,
+                    "shap": 0.03,
+                    "direction": "positive",
+                },
             ],
             "top_features": [
                 {"rank": 1, "feature": "CYP2D6 Poor Metabolizer", "importance": 0.35},
@@ -159,9 +204,7 @@ class MLService:
         shap: dict,
         explanation: str,
     ) -> None:
-        res = await self.db.execute(
-            select(AIRecommendation).where(AIRecommendation.id == recommendation_id)
-        )
+        res = await self.db.execute(select(AIRecommendation).where(AIRecommendation.id == recommendation_id))
         rec = res.scalar_one_or_none()
         if not rec:
             return
@@ -181,9 +224,7 @@ class MLService:
         await self.db.flush()
 
     async def _mark_failed(self, recommendation_id: str, error: str) -> None:
-        res = await self.db.execute(
-            select(AIRecommendation).where(AIRecommendation.id == recommendation_id)
-        )
+        res = await self.db.execute(select(AIRecommendation).where(AIRecommendation.id == recommendation_id))
         rec = res.scalar_one_or_none()
         if rec:
             rec.status = "failed"

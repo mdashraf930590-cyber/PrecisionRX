@@ -1,4 +1,5 @@
 """Audit logging service — HIPAA-compliant immutable audit trail."""
+
 from __future__ import annotations
 
 from typing import Any, Optional

@@ -1,4 +1,5 @@
 """Pydantic schemas for request/response validation."""
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -200,7 +201,7 @@ class DrugInteractionCheck(BaseModel):
 
 
 class DrugInteractionOut(BaseModel):
-    interactions: list[dict]   # [{drug_a, drug_b, severity, description, mechanism}]
+    interactions: list[dict]  # [{drug_a, drug_b, severity, description, mechanism}]
     total_found: int
     has_critical: bool
 
@@ -235,7 +236,7 @@ class RecommendationOut(BaseModel):
 
 class SHAPExplanation(BaseModel):
     recommendation_id: str
-    top_features: list[dict]          # [{feature, value, shap_value, direction}]
+    top_features: list[dict]  # [{feature, value, shap_value, direction}]
     waterfall_data: list[dict]
     base_value: float
     prediction_value: float
@@ -244,7 +245,7 @@ class SHAPExplanation(BaseModel):
 
 class DoctorAction(BaseModel):
     notes: Optional[str] = None
-    modified_drug: Optional[str] = None    # if modifying recommendation
+    modified_drug: Optional[str] = None  # if modifying recommendation
     modified_dose: Optional[float] = None
 
 
@@ -269,6 +270,7 @@ class RiskDistribution(BaseModel):
     high_risk: int
     critical_risk: int
     distribution_data: list[dict]
+
 
 # ─── Wearable Schemas ─────────────────────────────────────────────────────────
 class WearableReadingCreate(BaseModel):

@@ -4,6 +4,7 @@ API Integration Tests — FastAPI endpoints
 Uses httpx AsyncClient + pytest-asyncio for async endpoint testing.
 Tests all major routes: auth, patients, AI recommendations, analytics.
 """
+
 from __future__ import annotations
 
 import pytest
@@ -52,16 +53,22 @@ async def client():
 @pytest_asyncio.fixture
 async def auth_headers(client: AsyncClient):
     """Register and login a test doctor, return auth headers."""
-    await client.post("/api/v1/auth/register", json={
-        "email": "doctor@test.com",
-        "password": "Test1234!",
-        "full_name": "Dr. Test",
-        "role": "doctor",
-    })
-    login = await client.post("/api/v1/auth/login", json={
-        "email": "doctor@test.com",
-        "password": "Test1234!",
-    })
+    await client.post(
+        "/api/v1/auth/register",
+        json={
+            "email": "doctor@test.com",
+            "password": "Test1234!",
+            "full_name": "Dr. Test",
+            "role": "doctor",
+        },
+    )
+    login = await client.post(
+        "/api/v1/auth/login",
+        json={
+            "email": "doctor@test.com",
+            "password": "Test1234!",
+        },
+    )
     token = login.json()["access_token"]
     return {"Authorization": f"Bearer {token}"}
 
@@ -70,12 +77,15 @@ async def auth_headers(client: AsyncClient):
 @pytest.mark.asyncio
 class TestAuth:
     async def test_register_success(self, client: AsyncClient):
-        response = await client.post("/api/v1/auth/register", json={
-            "email": "new_user@example.com",
-            "password": "SecurePass123!",
-            "full_name": "Jane Doe",
-            "role": "viewer",
-        })
+        response = await client.post(
+            "/api/v1/auth/register",
+            json={
+                "email": "new_user@example.com",
+                "password": "SecurePass123!",
+                "full_name": "Jane Doe",
+                "role": "viewer",
+            },
+        )
         assert response.status_code == 201
         data = response.json()
         assert data["email"] == "new_user@example.com"
@@ -83,18 +93,30 @@ class TestAuth:
         assert "id" in data
 
     async def test_register_duplicate_email(self, client: AsyncClient):
-        payload = {"email": "dup@test.com", "password": "Test1234!", "full_name": "Test", "role": "viewer"}
+        payload = {
+            "email": "dup@test.com",
+            "password": "Test1234!",
+            "full_name": "Test",
+            "role": "viewer",
+        }
         await client.post("/api/v1/auth/register", json=payload)
         response = await client.post("/api/v1/auth/register", json=payload)
         assert response.status_code == 400
 
     async def test_login_success(self, client: AsyncClient):
-        await client.post("/api/v1/auth/register", json={
-            "email": "login_test@test.com", "password": "Test1234!", "full_name": "T", "role": "viewer"
-        })
-        response = await client.post("/api/v1/auth/login", json={
-            "email": "login_test@test.com", "password": "Test1234!"
-        })
+        await client.post(
+            "/api/v1/auth/register",
+            json={
+                "email": "login_test@test.com",
+                "password": "Test1234!",
+                "full_name": "T",
+                "role": "viewer",
+            },
+        )
+        response = await client.post(
+            "/api/v1/auth/login",
+            json={"email": "login_test@test.com", "password": "Test1234!"},
+        )
         assert response.status_code == 200
         data = response.json()
         assert "access_token" in data
@@ -102,9 +124,10 @@ class TestAuth:
         assert data["token_type"] == "bearer"
 
     async def test_login_wrong_password(self, client: AsyncClient):
-        response = await client.post("/api/v1/auth/login", json={
-            "email": "login_test@test.com", "password": "wrongpassword"
-        })
+        response = await client.post(
+            "/api/v1/auth/login",
+            json={"email": "login_test@test.com", "password": "wrongpassword"},
+        )
         assert response.status_code == 401
 
     async def test_me_authenticated(self, client: AsyncClient, auth_headers: dict):

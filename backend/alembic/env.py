@@ -55,6 +55,7 @@ def do_run_migrations(connection: Connection) -> None:
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode using synchronous engine."""
     from sqlalchemy import create_engine
+
     connectable = create_engine(
         settings.SYNC_DATABASE_URL,
         poolclass=pool.NullPool,

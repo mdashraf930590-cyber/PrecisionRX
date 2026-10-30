@@ -1,4 +1,5 @@
 """Celery application configuration for asynchronous ML processing tasks."""
+
 from __future__ import annotations
 
 import asyncio
@@ -51,7 +52,7 @@ def run_recommendation_task(self, patient_id: str, recommendation_id: str):
             if not patient:
                 logger.error(f"Patient {patient_id} not found in ML task")
                 return {"status": "failed", "error": "Patient not found"}
-            
+
             ml_svc = MLService(session)
             await ml_svc.run_recommendation_pipeline(
                 patient=patient,
@@ -59,7 +60,11 @@ def run_recommendation_task(self, patient_id: str, recommendation_id: str):
                 config=RecommendationTrigger(force_refresh=True),
             )
             await session.commit()
-            return {"status": "completed", "patient_id": patient_id, "recommendation_id": recommendation_id}
+            return {
+                "status": "completed",
+                "patient_id": patient_id,
+                "recommendation_id": recommendation_id,
+            }
 
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)

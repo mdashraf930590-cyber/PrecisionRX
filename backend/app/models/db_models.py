@@ -1,12 +1,20 @@
 """SQLAlchemy ORM models for PostgreSQL."""
+
 from __future__ import annotations
 
 import uuid
 from datetime import datetime
 
 from sqlalchemy import (
-    JSON, Boolean, DateTime, Float, ForeignKey, Integer,
-    String, Text, func,
+    JSON,
+    Boolean,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    func,
 )
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -31,7 +39,9 @@ class User(Base):
     npi_number: Mapped[str | None] = mapped_column(String(20))  # National Provider Identifier
     department: Mapped[str | None] = mapped_column(String(100))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
     recommendations: Mapped[list["AIRecommendation"]] = relationship(back_populates="doctor")
     audit_logs: Mapped[list["AuditLog"]] = relationship(back_populates="user")
@@ -62,7 +72,9 @@ class Patient(Base):
     fhir_resource_id: Mapped[str | None] = mapped_column(String(100))
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
     genomic_profile: Mapped["GenomicProfile | None"] = relationship(back_populates="patient", uselist=False)
     lab_results: Mapped[list["LabResult"]] = relationship(back_populates="patient")
@@ -78,10 +90,10 @@ class GenomicProfile(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=gen_uuid)
     patient_id: Mapped[str] = mapped_column(String(36), ForeignKey("patients.id"), unique=True, nullable=False)
     raw_vcf_path: Mapped[str | None] = mapped_column(String(500))
-    parsed_snps: Mapped[dict | None] = mapped_column(JSONB)          # SNP variant data
+    parsed_snps: Mapped[dict | None] = mapped_column(JSONB)  # SNP variant data
     metabolizer_statuses: Mapped[dict | None] = mapped_column(JSONB)  # CYP enzyme statuses
     hla_alleles: Mapped[dict | None] = mapped_column(JSONB)
-    pgx_risk_flags: Mapped[dict | None] = mapped_column(JSONB)        # pharmacogenomic risk
+    pgx_risk_flags: Mapped[dict | None] = mapped_column(JSONB)  # pharmacogenomic risk
     processed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     pipeline_version: Mapped[str | None] = mapped_column(String(20))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
@@ -125,7 +137,7 @@ class Medication(Base):
     dose_mg: Mapped[float] = mapped_column(Float, nullable=False)
     dose_unit: Mapped[str] = mapped_column(String(20), default="mg")
     frequency: Mapped[str] = mapped_column(String(100), nullable=False)  # e.g., "BID", "QD"
-    route: Mapped[str | None] = mapped_column(String(50))               # PO/IV/SQ
+    route: Mapped[str | None] = mapped_column(String(50))  # PO/IV/SQ
     drug_class: Mapped[str | None] = mapped_column(String(100))
     indication: Mapped[str | None] = mapped_column(String(200))
     start_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
@@ -153,13 +165,13 @@ class AIRecommendation(Base):
     titration_schedule: Mapped[dict | None] = mapped_column(JSONB)
     confidence_score: Mapped[float] = mapped_column(Float, nullable=False)  # 0.0–1.0
     adr_probability: Mapped[float | None] = mapped_column(Float)
-    adr_severity: Mapped[str | None] = mapped_column(String(20))            # Mild/Moderate/Severe
+    adr_severity: Mapped[str | None] = mapped_column(String(20))  # Mild/Moderate/Severe
     risk_flags: Mapped[dict | None] = mapped_column(JSONB)
     shap_values: Mapped[dict | None] = mapped_column(JSONB)
     feature_importance: Mapped[dict | None] = mapped_column(JSONB)
     natural_language_explanation: Mapped[str | None] = mapped_column(Text)
     alternative_drugs: Mapped[dict | None] = mapped_column(JSONB)
-    status: Mapped[str] = mapped_column(String(20), default="pending")      # pending/approved/rejected/modified
+    status: Mapped[str] = mapped_column(String(20), default="pending")  # pending/approved/rejected/modified
     doctor_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("users.id"))
     doctor_notes: Mapped[str | None] = mapped_column(Text)
     reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
@@ -176,7 +188,7 @@ class WearableReading(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=gen_uuid)
     patient_id: Mapped[str] = mapped_column(String(36), ForeignKey("patients.id"), nullable=False, index=True)
     device_type: Mapped[str] = mapped_column(String(100))  # Apple Watch, Fitbit, etc.
-    metric_type: Mapped[str] = mapped_column(String(50))   # heart_rate, spo2, steps, sleep
+    metric_type: Mapped[str] = mapped_column(String(50))  # heart_rate, spo2, steps, sleep
     value: Mapped[float] = mapped_column(Float, nullable=False)
     unit: Mapped[str | None] = mapped_column(String(20))
     is_anomaly: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -193,7 +205,7 @@ class AuditLog(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=gen_uuid)
     user_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("users.id"))
-    action: Mapped[str] = mapped_column(String(100), nullable=False)      # CREATE/READ/UPDATE/DELETE
+    action: Mapped[str] = mapped_column(String(100), nullable=False)  # CREATE/READ/UPDATE/DELETE
     resource_type: Mapped[str] = mapped_column(String(100), nullable=False)
     resource_id: Mapped[str | None] = mapped_column(String(36))
     changes: Mapped[dict | None] = mapped_column(JSONB)

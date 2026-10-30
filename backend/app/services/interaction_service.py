@@ -1,4 +1,5 @@
 """Drug-Drug Interaction Service — clinical interaction database and cross-checker."""
+
 from __future__ import annotations
 
 import itertools
@@ -7,7 +8,6 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.db_models import Medication
-
 
 # Clinical drug interaction knowledgebase (severity: major, moderate, minor)
 KNOWN_INTERACTIONS: dict[frozenset[str], dict[str, str]] = {
@@ -111,7 +111,11 @@ class DrugInteractionService:
             result = await db.execute(
                 select(Medication).where(
                     Medication.patient_id == patient_id,
-                    Medication.is_deleted == False if hasattr(Medication, "is_deleted") else Medication.is_active == True,
+                    (
+                        Medication.is_deleted == False
+                        if hasattr(Medication, "is_deleted")
+                        else Medication.is_active == True
+                    ),
                 )
             )
             patient_meds = result.scalars().all()
@@ -136,14 +140,16 @@ class DrugInteractionService:
 
             matched_info = self._lookup_interaction(drug_a, drug_b)
             if matched_info:
-                found_interactions.append({
-                    "drug_a": drug_a.capitalize(),
-                    "drug_b": drug_b.capitalize(),
-                    "severity": matched_info["severity"],
-                    "description": matched_info["description"],
-                    "mechanism": matched_info["mechanism"],
-                    "management": matched_info.get("management", "Review therapy and monitor patient."),
-                })
+                found_interactions.append(
+                    {
+                        "drug_a": drug_a.capitalize(),
+                        "drug_b": drug_b.capitalize(),
+                        "severity": matched_info["severity"],
+                        "description": matched_info["description"],
+                        "mechanism": matched_info["mechanism"],
+                        "management": matched_info.get("management", "Review therapy and monitor patient."),
+                    }
+                )
 
         # Sort with major interactions first
         severity_order = {"major": 0, "moderate": 1, "minor": 2}

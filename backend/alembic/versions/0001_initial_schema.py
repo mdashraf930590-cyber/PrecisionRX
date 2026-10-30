@@ -1,4 +1,5 @@
 """Initial database schema migration."""
+
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import JSONB
@@ -58,7 +59,13 @@ def upgrade() -> None:
     op.create_table(
         "genomic_profiles",
         sa.Column("id", sa.String(36), primary_key=True),
-        sa.Column("patient_id", sa.String(36), sa.ForeignKey("patients.id"), nullable=False, unique=True),
+        sa.Column(
+            "patient_id",
+            sa.String(36),
+            sa.ForeignKey("patients.id"),
+            nullable=False,
+            unique=True,
+        ),
         sa.Column("raw_vcf_path", sa.String(500)),
         sa.Column("parsed_snps", JSONB),
         sa.Column("metabolizer_statuses", JSONB),

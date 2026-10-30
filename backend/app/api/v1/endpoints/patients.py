@@ -1,4 +1,5 @@
 """Patient CRUD API endpoints."""
+
 from __future__ import annotations
 
 import math
@@ -12,7 +13,10 @@ from app.core.database import get_db
 from app.core.security import get_current_user, require_permission
 from app.models.db_models import Patient, User
 from app.schemas.schemas import (
-    PaginatedResponse, PatientCreate, PatientOut, PatientUpdate,
+    PaginatedResponse,
+    PatientCreate,
+    PatientOut,
+    PatientUpdate,
 )
 from app.services.audit_service import AuditService
 
@@ -155,9 +159,7 @@ async def delete_patient(
 
 # ─── Helper ───────────────────────────────────────────────────────────────────
 async def _get_or_404(db: AsyncSession, patient_id: str) -> Patient:
-    result = await db.execute(
-        select(Patient).where(Patient.id == patient_id, Patient.is_deleted == False)
-    )
+    result = await db.execute(select(Patient).where(Patient.id == patient_id, Patient.is_deleted == False))
     patient = result.scalar_one_or_none()
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found")

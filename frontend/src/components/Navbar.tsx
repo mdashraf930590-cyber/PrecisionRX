@@ -683,7 +683,7 @@ export default function Navbar({ showSearch, searchTerm, onSearchChange, onOpenA
                   <ExternalLink style={{ width: "0.85rem", height: "0.85rem", color: "#0284c7" }} />
                 </a>
 
-                <a
+                <Link
                   href="/#features"
                   onClick={() => setIsOpen(false)}
                   style={{
@@ -706,7 +706,7 @@ export default function Navbar({ showSearch, searchTerm, onSearchChange, onOpenA
                     Tech Stack &amp; Architecture (docs/)
                   </span>
                   <ChevronRight style={{ width: "0.85rem", height: "0.85rem", color: "#0284c7" }} />
-                </a>
+                </Link>
               </div>
             </div>
 

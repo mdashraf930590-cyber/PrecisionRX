@@ -1,4 +1,5 @@
 """Analytics endpoints — population stats, outcomes, risk distribution."""
+
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends
@@ -23,14 +24,11 @@ async def population_stats(
     high_risk = await db.scalar(
         select(func.count(Patient.id)).where(Patient.risk_score > 0.7, Patient.is_deleted == False)
     )
-    avg_adherence_result = await db.scalar(
-        select(func.avg(Patient.adherence_score)).where(Patient.is_deleted == False)
-    )
+    avg_adherence_result = await db.scalar(select(func.avg(Patient.adherence_score)).where(Patient.is_deleted == False))
     avg_adherence = float(avg_adherence_result or 0.0)
-    pending = await db.scalar(
-        select(func.count(AIRecommendation.id)).where(AIRecommendation.status == "pending")
-    )
+    pending = await db.scalar(select(func.count(AIRecommendation.id)).where(AIRecommendation.status == "pending"))
     from datetime import datetime, timezone, timedelta
+
     today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
     approved_today = await db.scalar(
         select(func.count(AIRecommendation.id)).where(
@@ -59,15 +57,18 @@ async def outcome_trends(
     # In production: query approved recommendations + follow-up outcomes
     import random
     from datetime import datetime, timedelta
+
     data = []
     for i in range(24):
         d = datetime.now() - timedelta(weeks=24 - i)
-        data.append({
-            "date": d.strftime("%Y-%m-%d"),
-            "improved": random.randint(60, 85),
-            "stable": random.randint(10, 25),
-            "worsened": random.randint(3, 12),
-        })
+        data.append(
+            {
+                "date": d.strftime("%Y-%m-%d"),
+                "improved": random.randint(60, 85),
+                "stable": random.randint(10, 25),
+                "worsened": random.randint(3, 12),
+            }
+        )
     return OutcomeTrends(period=period, data=data)
 
 
@@ -78,9 +79,15 @@ async def risk_distribution(
 ):
     """Get patient risk distribution breakdown."""
     low = await db.scalar(select(func.count(Patient.id)).where(Patient.risk_score < 0.3, Patient.is_deleted == False))
-    med = await db.scalar(select(func.count(Patient.id)).where(Patient.risk_score.between(0.3, 0.5), Patient.is_deleted == False))
-    high = await db.scalar(select(func.count(Patient.id)).where(Patient.risk_score.between(0.5, 0.75), Patient.is_deleted == False))
-    critical = await db.scalar(select(func.count(Patient.id)).where(Patient.risk_score > 0.75, Patient.is_deleted == False))
+    med = await db.scalar(
+        select(func.count(Patient.id)).where(Patient.risk_score.between(0.3, 0.5), Patient.is_deleted == False)
+    )
+    high = await db.scalar(
+        select(func.count(Patient.id)).where(Patient.risk_score.between(0.5, 0.75), Patient.is_deleted == False)
+    )
+    critical = await db.scalar(
+        select(func.count(Patient.id)).where(Patient.risk_score > 0.75, Patient.is_deleted == False)
+    )
 
     return RiskDistribution(
         low_risk=low or 0,
