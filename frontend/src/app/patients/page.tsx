@@ -10,18 +10,44 @@ import {
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 
-// Comprehensive Clinical Patient Cohort
-const COHORT_PATIENTS = [
+// Comprehensive Clinical Patient Cohort across Target Disease Disciplines:
+// Fatty Liver (MASH/NAFLD), Diabetes, Gastroenterology (GERD), Liver Cirrhosis & DILI, Hypertension, Dyslipidemia, Obesity
+export interface CohortPatient {
+  id: string;
+  name: string;
+  age: number;
+  sex: "Female" | "Male";
+  mrn: string;
+  condition: string;
+  diseaseCategory: "liver" | "diabetes" | "gastro" | "hypertension" | "dyslipidemia" | "obesity";
+  diseaseBadge: string;
+  recommendedDrug: string;
+  drugCategory: string;
+  pgxGene: string;
+  pgxImpact: string;
+  activeMed: string;
+  riskScore: number;
+  status: "critical" | "high" | "medium" | "low";
+  adherence: number;
+  eGFR: number;
+  lastVisit: string;
+}
+
+const COHORT_PATIENTS: CohortPatient[] = [
   {
     id: "p1",
     name: "Margaret Johnson",
     age: 68,
     sex: "Female",
     mrn: "MRN-2024-001",
-    condition: "Type 2 Diabetes + Essential HTN",
+    condition: "Type 2 Diabetes Mellitus + Essential HTN",
+    diseaseCategory: "diabetes",
+    diseaseBadge: "Diabetes & Glycemic",
+    recommendedDrug: "Metformin HCl 500mg BID + Empagliflozin 10mg QD",
+    drugCategory: "Biguanide + SGLT2 Inhibitor",
     pgxGene: "CYP2D6 *4/*4",
     pgxImpact: "Poor Metabolizer",
-    activeMed: "Metformin + Codeine",
+    activeMed: "Metformin 500mg + Lisinopril 10mg",
     riskScore: 0.89,
     status: "critical",
     adherence: 71,
@@ -34,10 +60,14 @@ const COHORT_PATIENTS = [
     age: 54,
     sex: "Male",
     mrn: "MRN-2024-002",
-    condition: "Atrial Fibrillation · Post-PCI",
+    condition: "Atrial Fibrillation · Post-PCI Stent",
+    diseaseCategory: "hypertension",
+    diseaseBadge: "Cardiovascular & HTN",
+    recommendedDrug: "Ticagrelor 90mg BID + Apixaban 5mg BID",
+    drugCategory: "Direct P2Y12 + Factor Xa Inhibitor",
     pgxGene: "CYP2C19 *2/*2",
-    pgxImpact: "Loss-of-Function",
-    activeMed: "Clopidogrel (Plavix) 75mg",
+    pgxImpact: "Loss-of-Function (Clopidogrel Failure)",
+    activeMed: "Clopidogrel 75mg + Metoprolol 50mg",
     riskScore: 0.62,
     status: "high",
     adherence: 84,
@@ -50,15 +80,19 @@ const COHORT_PATIENTS = [
     age: 41,
     sex: "Female",
     mrn: "MRN-2024-003",
-    condition: "Familial Hypercholesterolemia",
+    condition: "Severe Familial Dyslipidemia & Hypercholesterolemia",
+    diseaseCategory: "dyslipidemia",
+    diseaseBadge: "Dyslipidemia (Lipids)",
+    recommendedDrug: "Rosuvastatin 10mg QD + Ezetimibe 10mg QD",
+    drugCategory: "Hydrophilic Statin + NPC1L1 Inhibitor",
     pgxGene: "SLCO1B1 *5 Carrier",
-    pgxImpact: "Statin Myopathy Risk",
-    activeMed: "Simvastatin 40mg QD",
+    pgxImpact: "Severe Statin Myopathy Hazard",
+    activeMed: "Simvastatin 40mg QD (Toxic Hazard)",
     riskScore: 0.74,
     status: "high",
     adherence: 93,
     eGFR: 90,
-    lastVisit: "Oct 24, 2026",
+    lastVisit: "Oct 29, 2026",
   },
   {
     id: "p4",
@@ -66,31 +100,39 @@ const COHORT_PATIENTS = [
     age: 73,
     sex: "Male",
     mrn: "MRN-2024-004",
-    condition: "CKD Stage 3B + Refractory HTN",
+    condition: "Refractory Stage 3B Hypertension + CKD",
+    diseaseCategory: "hypertension",
+    diseaseBadge: "Hypertension (HTN)",
+    recommendedDrug: "Telmisartan 80mg QD + Amlodipine 10mg QD",
+    drugCategory: "Direct ARB (Zero CYP2C9 Dependency) + CCB",
     pgxGene: "CYP2C9 *3/*3",
-    pgxImpact: "Reduced Clearance",
-    activeMed: "Warfarin 5mg + Lisinopril",
+    pgxImpact: "Reduced Clearance (Losartan Ineffective)",
+    activeMed: "Losartan 50mg + Furosemide 20mg",
     riskScore: 0.91,
     status: "critical",
     adherence: 65,
     eGFR: 34,
-    lastVisit: "Oct 23, 2026",
+    lastVisit: "Oct 28, 2026",
   },
   {
     id: "p5",
-    name: "Sarah Williams",
-    age: 29,
-    sex: "Female",
+    name: "Dr. Carlos Mendoza",
+    age: 52,
+    sex: "Male",
     mrn: "MRN-2024-005",
-    condition: "Major Depressive Disorder",
-    pgxGene: "CYP2D6 *1/*1",
-    pgxImpact: "Normal Metabolizer",
-    activeMed: "Sertraline 50mg QD",
-    riskScore: 0.15,
-    status: "low",
-    adherence: 97,
-    eGFR: 104,
-    lastVisit: "Oct 22, 2026",
+    condition: "MASH / Fatty Liver Disease (F3 Fibrosis)",
+    diseaseCategory: "liver",
+    diseaseBadge: "Fatty Liver & Hepatic",
+    recommendedDrug: "Resmetirom (Rezdiffra) 80mg QD + Pioglitazone 30mg QD",
+    drugCategory: "Thyroid Hormone Receptor-β Agonist + PPAR-γ",
+    pgxGene: "PNPLA3 I148M + TM6SF2",
+    pgxImpact: "Accelerated Steatohepatitis & Fibrosis",
+    activeMed: "Vitamin E 400 IU + Atorvastatin 10mg",
+    riskScore: 0.85,
+    status: "critical",
+    adherence: 89,
+    eGFR: 84,
+    lastVisit: "Oct 28, 2026",
   },
   {
     id: "p6",
@@ -98,31 +140,39 @@ const COHORT_PATIENTS = [
     age: 61,
     sex: "Male",
     mrn: "MRN-2024-006",
-    condition: "Post-STEMI Recovery · CAD",
-    pgxGene: "CYP2C19 *1/*17",
-    pgxImpact: "Rapid Metabolizer",
-    activeMed: "Ticagrelor 90mg BID",
-    riskScore: 0.38,
+    condition: "Mixed Atherogenic Dyslipidemia (TG 380 mg/dL)",
+    diseaseCategory: "dyslipidemia",
+    diseaseBadge: "Dyslipidemia (Lipids)",
+    recommendedDrug: "Pitavastatin 4mg QD + Icosapent Ethyl (Vascepa) 2g BID",
+    drugCategory: "Minimal SLCO1B1 Statin + Purified EPA",
+    pgxGene: "SLCO1B1 *1/*15 + CYP3A4 *22",
+    pgxImpact: "Intermediate Hepatic Transporter",
+    activeMed: "Fenofibrate 145mg + Low-dose Statin",
+    riskScore: 0.58,
     status: "medium",
-    adherence: 88,
+    adherence: 79,
     eGFR: 82,
-    lastVisit: "Oct 20, 2026",
+    lastVisit: "Oct 27, 2026",
   },
   {
     id: "p7",
-    name: "Lisa Anderson",
-    age: 47,
+    name: "Patricia Green",
+    age: 46,
     sex: "Female",
     mrn: "MRN-2024-007",
-    condition: "Colorectal Adenocarcinoma (Stage II)",
-    pgxGene: "DPYD *2A Heterozygote",
-    pgxImpact: "Severe Toxicity Hazard",
-    activeMed: "Fluorouracil (5-FU) Planned",
-    riskScore: 0.95,
-    status: "critical",
-    adherence: 92,
-    eGFR: 75,
-    lastVisit: "Oct 19, 2026",
+    condition: "Refractory GERD & Severe Erosive Esophagitis",
+    diseaseCategory: "gastro",
+    diseaseBadge: "Gastroenterology (GERD/GI)",
+    recommendedDrug: "Vonoprazan (Voquezna) 20mg QD",
+    drugCategory: "Potassium-Competitive Acid Blocker (P-CAB)",
+    pgxGene: "CYP2C19 *17/*17",
+    pgxImpact: "Ultra-Rapid Metabolizer (PPI Non-Response)",
+    activeMed: "Omeprazole 40mg BID (Subtherapeutic)",
+    riskScore: 0.72,
+    status: "high",
+    adherence: 94,
+    eGFR: 96,
+    lastVisit: "Oct 26, 2026",
   },
   {
     id: "p8",
@@ -130,31 +180,39 @@ const COHORT_PATIENTS = [
     age: 58,
     sex: "Male",
     mrn: "MRN-2024-008",
-    condition: "HIV-1 Infection · Naïve",
-    pgxGene: "HLA-B *57:01 Positive",
-    pgxImpact: "Hypersensitivity Risk",
-    activeMed: "Antiretroviral Screening",
-    riskScore: 0.82,
+    condition: "Decompensated Hepatic Cirrhosis & Portal HTN",
+    diseaseCategory: "liver",
+    diseaseBadge: "Liver Cirrhosis & Hepatic",
+    recommendedDrug: "Rifaximin 550mg BID + Lactulose 30mL TID",
+    drugCategory: "Gut-Selective Antimicrobial + Osmotic Laxative",
+    pgxGene: "CYP2E1 High Inducible",
+    pgxImpact: "Impaired Hepatic First-Pass Clearance",
+    activeMed: "Spironolactone 100mg + Propranolol 20mg",
+    riskScore: 0.93,
     status: "critical",
-    adherence: 90,
-    eGFR: 88,
-    lastVisit: "Oct 18, 2026",
+    adherence: 76,
+    eGFR: 58,
+    lastVisit: "Oct 25, 2026",
   },
   {
     id: "p9",
     name: "Elena Rostova",
-    age: 52,
+    age: 39,
     sex: "Female",
     mrn: "MRN-2024-009",
-    condition: "Rheumatoid Arthritis",
-    pgxGene: "TPMT *3A/*3C",
-    pgxImpact: "Intermediate Metabolizer",
-    activeMed: "Azathioprine 50mg QD",
-    riskScore: 0.58,
-    status: "medium",
-    adherence: 86,
-    eGFR: 81,
-    lastVisit: "Oct 17, 2026",
+    condition: "Class II Severe Obesity (BMI 38.6) + MetSyn",
+    diseaseCategory: "obesity",
+    diseaseBadge: "Obesity & Metabolic",
+    recommendedDrug: "Tirzepatide (Zepbound) 2.5mg SC Weekly (Titrate to 10mg)",
+    drugCategory: "Dual GIP / GLP-1 Receptor Agonist",
+    pgxGene: "FTO rs9939609 + MC4R",
+    pgxImpact: "High Satiety Resistance Allele",
+    activeMed: "Metformin ER 1000mg QD",
+    riskScore: 0.68,
+    status: "high",
+    adherence: 91,
+    eGFR: 102,
+    lastVisit: "Oct 24, 2026",
   },
   {
     id: "p10",
@@ -162,15 +220,59 @@ const COHORT_PATIENTS = [
     age: 66,
     sex: "Male",
     mrn: "MRN-2024-010",
-    condition: "Deep Vein Thrombosis (DVT)",
-    pgxGene: "VKORC1 -1639G>A",
-    pgxImpact: "Warfarin Sensitivity",
-    activeMed: "Warfarin 2.5mg QD",
-    riskScore: 0.67,
-    status: "high",
+    condition: "Resistant Hypertension (Triple-Refractory)",
+    diseaseCategory: "hypertension",
+    diseaseBadge: "Hypertension (HTN)",
+    recommendedDrug: "Spironolactone 25mg QD + Telmisartan 80mg QD",
+    drugCategory: "Mineralocorticoid Antagonist + ARB",
+    pgxGene: "SCNN1G Amiloride Channel",
+    pgxImpact: "Aldosterone Escape Phenomenon",
+    activeMed: "Lisinopril 40mg + Amlodipine 10mg + HCTZ 25mg",
+    riskScore: 0.81,
+    status: "critical",
     adherence: 82,
     eGFR: 69,
-    lastVisit: "Oct 15, 2026",
+    lastVisit: "Oct 23, 2026",
+  },
+  {
+    id: "p11",
+    name: "Sophia Patel",
+    age: 44,
+    sex: "Female",
+    mrn: "MRN-2024-011",
+    condition: "Metabolic Syndrome, Pre-Diabetes & High Triglycerides",
+    diseaseCategory: "diabetes",
+    diseaseBadge: "Diabetes & Dyslipidemia",
+    recommendedDrug: "Empagliflozin 10mg QD + Icosapent Ethyl 2g BID",
+    drugCategory: "SGLT2 Inhibitor + High-Purity EPA",
+    pgxGene: "APOC3 Promoter Variant",
+    pgxImpact: "Delayed Chylomicron Lipolysis",
+    activeMed: "Atorvastatin 20mg QD",
+    riskScore: 0.52,
+    status: "medium",
+    adherence: 95,
+    eGFR: 98,
+    lastVisit: "Oct 22, 2026",
+  },
+  {
+    id: "p12",
+    name: "Arthur Pendelton",
+    age: 63,
+    sex: "Male",
+    mrn: "MRN-2024-012",
+    condition: "Acute Drug-Induced Liver Injury (DILI) & Cholestasis",
+    diseaseCategory: "liver",
+    diseaseBadge: "DILI & Liver Related",
+    recommendedDrug: "Stop Amox-Clav + Ursodeoxycholic Acid 500mg BID + NAC",
+    drugCategory: "Hepatoprotective Hydrophilic Bile Acid + Antioxidant",
+    pgxGene: "HLA-B *57:01 + HLA-DRB1",
+    pgxImpact: "Immune-Mediated Hepatotoxic Hyper-Sensitivity",
+    activeMed: "Amoxicillin-Clavulanate (Discontinued)",
+    riskScore: 0.96,
+    status: "critical",
+    adherence: 88,
+    eGFR: 74,
+    lastVisit: "Oct 21, 2026",
   },
 ];
 
@@ -243,6 +345,7 @@ export default function PatientsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [geneFilter, setGeneFilter] = useState<string>("all");
+  const [diseaseFilter, setDiseaseFilter] = useState<string>("all");
 
   const filteredPatients = COHORT_PATIENTS.filter((patient) => {
     const matchesSearch =
@@ -250,6 +353,7 @@ export default function PatientsPage() {
       patient.mrn.toLowerCase().includes(searchTerm.toLowerCase()) ||
       patient.condition.toLowerCase().includes(searchTerm.toLowerCase()) ||
       patient.activeMed.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.recommendedDrug.toLowerCase().includes(searchTerm.toLowerCase()) ||
       patient.pgxGene.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus =
@@ -259,7 +363,10 @@ export default function PatientsPage() {
       geneFilter === "all" ||
       patient.pgxGene.toLowerCase().includes(geneFilter.toLowerCase());
 
-    return matchesSearch && matchesStatus && matchesGene;
+    const matchesDisease =
+      diseaseFilter === "all" || patient.diseaseCategory === diseaseFilter;
+
+    return matchesSearch && matchesStatus && matchesGene && matchesDisease;
   });
 
   return (
@@ -383,13 +490,61 @@ export default function PatientsPage() {
                 className="px-3 py-2 text-xs font-bold bg-sky-50 border-2 border-sky-200 rounded-xl text-sky-950 focus:outline-none"
               >
                 <option value="all">All Pharmacogenes</option>
-                <option value="CYP2D6">CYP2D6</option>
-                <option value="CYP2C19">CYP2C19</option>
-                <option value="CYP2C9">CYP2C9</option>
-                <option value="SLCO1B1">SLCO1B1</option>
-                <option value="DPYD">DPYD</option>
-                <option value="HLA-B">HLA-B</option>
+                <option value="PNPLA3">PNPLA3 (Fatty Liver/MASH)</option>
+                <option value="CYP2C19">CYP2C19 (GERD/P2Y12)</option>
+                <option value="SLCO1B1">SLCO1B1 (Dyslipidemia)</option>
+                <option value="CYP2D6">CYP2D6 (Cardio/CNS)</option>
+                <option value="CYP2C9">CYP2C9 (HTN/Warfarin)</option>
+                <option value="CYP2E1">CYP2E1 (Cirrhosis/DILI)</option>
+                <option value="HLA-B">HLA-B (Immune DILI/Toxicity)</option>
+                <option value="FTO">FTO / MC4R (Obesity)</option>
               </select>
+            </div>
+          </div>
+
+          {/* Disease Category Filter Pills */}
+          <div className="bg-white rounded-2xl border-2 border-sky-200 p-3 shadow-xs">
+            <div className="flex items-center justify-between gap-2 flex-wrap mb-2">
+              <div className="flex items-center gap-2 text-xs font-black text-sky-900 uppercase tracking-wider">
+                <Filter size={14} className="text-sky-600" />
+                <span>Filter by Clinical Condition / Specialty</span>
+              </div>
+              <span className="text-[11px] text-slate-500 font-bold">
+                Showing {filteredPatients.length} of {COHORT_PATIENTS.length} target patient dossiers
+              </span>
+            </div>
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+              {[
+                { id: "all", label: "All Conditions", count: COHORT_PATIENTS.length },
+                { id: "liver", label: "Fatty Liver & Liver Diseases", count: COHORT_PATIENTS.filter(p => p.diseaseCategory === "liver").length },
+                { id: "diabetes", label: "Diabetes Mellitus", count: COHORT_PATIENTS.filter(p => p.diseaseCategory === "diabetes").length },
+                { id: "gastro", label: "Gastroenterology / GERD", count: COHORT_PATIENTS.filter(p => p.diseaseCategory === "gastro").length },
+                { id: "hypertension", label: "Hypertension (HTN)", count: COHORT_PATIENTS.filter(p => p.diseaseCategory === "hypertension").length },
+                { id: "dyslipidemia", label: "Dyslipidemia & Lipids", count: COHORT_PATIENTS.filter(p => p.diseaseCategory === "dyslipidemia").length },
+                { id: "obesity", label: "Obesity & Metabolic", count: COHORT_PATIENTS.filter(p => p.diseaseCategory === "obesity").length },
+              ].map((pill) => {
+                const isActive = diseaseFilter === pill.id;
+                return (
+                  <button
+                    key={pill.id}
+                    onClick={() => setDiseaseFilter(pill.id)}
+                    className={`whitespace-nowrap px-3 py-1.5 rounded-xl text-xs font-bold transition-all border flex items-center gap-1.5 ${
+                      isActive
+                        ? "bg-sky-600 text-white border-sky-700 shadow-xs"
+                        : "bg-sky-50 text-sky-900 border-sky-200 hover:bg-sky-100"
+                    }`}
+                  >
+                    <span>{pill.label}</span>
+                    <span
+                      className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
+                        isActive ? "bg-white text-sky-800" : "bg-sky-200 text-sky-900"
+                      }`}
+                    >
+                      {pill.count}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -400,12 +555,12 @@ export default function PatientsPage() {
                 <thead>
                   <tr className="bg-sky-100/70 border-b-2 border-sky-200 text-sky-900 text-xs font-black uppercase tracking-wider">
                     <th className="py-3 px-4">Patient Profile &amp; MRN</th>
-                    <th className="py-3 px-4">Primary Diagnosis</th>
-                    <th className="py-3 px-4">Pharmacogenomic Marker</th>
-                    <th className="py-3 px-4">Active Medication</th>
-                    <th className="py-3 px-4">ADR Risk Score</th>
+                    <th className="py-3 px-4">Primary Condition &amp; Specialty</th>
+                    <th className="py-3 px-4">Pharmacogenomics (PGx)</th>
+                    <th className="py-3 px-4">Current Med vs AI Drug Recommendation</th>
+                    <th className="py-3 px-4">ADR Risk</th>
                     <th className="py-3 px-4">Adherence / eGFR</th>
-                    <th className="py-3 px-4 text-right">Action</th>
+                    <th className="py-3 px-4 text-right">Clinical Deep-Dive</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-sky-100 text-xs font-semibold text-slate-800">
@@ -447,8 +602,11 @@ export default function PatientsPage() {
                         </td>
 
                         <td className="py-3.5 px-4 max-w-xs">
-                          <span className="text-slate-900 font-bold">
+                          <div className="font-bold text-slate-900 mb-1">
                             {patient.condition}
+                          </div>
+                          <span className="inline-block text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-sky-100 text-sky-800 border border-sky-200">
+                            {patient.diseaseBadge}
                           </span>
                         </td>
 
@@ -463,10 +621,19 @@ export default function PatientsPage() {
                           </div>
                         </td>
 
-                        <td className="py-3.5 px-4">
-                          <span className="font-bold text-slate-800">
+                        <td className="py-3.5 px-4 max-w-sm">
+                          <div className="text-slate-800 font-semibold mb-1">
+                            <span className="text-[10px] uppercase font-bold text-slate-500 mr-1">Current:</span>
                             {patient.activeMed}
-                          </span>
+                          </div>
+                          <div className="p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-950 text-[11px] font-bold">
+                            <div className="flex items-center gap-1 text-emerald-800 text-[10px] uppercase font-black mb-0.5">
+                              <Sparkles size={11} className="text-emerald-600" />
+                              <span>AI Recommended:</span>
+                            </div>
+                            <div>{patient.recommendedDrug}</div>
+                            <div className="text-[10px] text-emerald-700 font-medium mt-0.5">{patient.drugCategory}</div>
+                          </div>
                         </td>
 
                         <td className="py-3.5 px-4">
@@ -506,7 +673,7 @@ export default function PatientsPage() {
 
                         <td className="py-3.5 px-4 text-right">
                           <Link href={`/patient/${patient.id}`}>
-                            <button className="px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs inline-flex items-center gap-1 shadow-xs transition-colors">
+                            <button className="px-3.5 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs inline-flex items-center gap-1 shadow-xs transition-colors">
                               <span>Profile</span>
                               <ChevronRight size={14} />
                             </button>

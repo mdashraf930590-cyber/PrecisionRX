@@ -106,10 +106,12 @@ const EFFICACY_COMPARISON = [
 ];
 
 const ADR_HOTSPOTS = [
-  { drug: "Warfarin", targetRisk: "Bleeding Events", riskReduction: "41% Lower", alertLevel: "high" },
-  { drug: "Simvastatin", targetRisk: "Statin Myopathy (SLCO1B1)", riskReduction: "68% Lower", alertLevel: "critical" },
-  { drug: "Clopidogrel", targetRisk: "Non-Response / Thrombosis", riskReduction: "53% Lower", alertLevel: "high" },
-  { drug: "Codeine", targetRisk: "Respiratory Depression / Lack of Analgesia", riskReduction: "79% Lower", alertLevel: "critical" },
+  { drug: "Amox-Clav / Flucloxacillin", targetRisk: "Acute Cholestatic DILI (HLA-B *57:01)", riskReduction: "92% Lower", alertLevel: "critical" },
+  { drug: "Simvastatin / Lovastatin", targetRisk: "Toxic Rhabdomyolysis & Myopathy (SLCO1B1 *5)", riskReduction: "88% Lower", alertLevel: "critical" },
+  { drug: "Standard PPIs (Omeprazole)", targetRisk: "Refractory GERD Ulceration (CYP2C19 *17/*17)", riskReduction: "84% Lower", alertLevel: "high" },
+  { drug: "Resmetirom / MASH Regimen", targetRisk: "Cirrhotic Progression (PNPLA3 I148M G/G)", riskReduction: "76% Lower", alertLevel: "high" },
+  { drug: "Warfarin", targetRisk: "Major Hemorrhage & Bleeding (CYP2C9 / VKORC1)", riskReduction: "64% Lower", alertLevel: "high" },
+  { drug: "Codeine / Tramadol", targetRisk: "Fatal Respiratory Depression (CYP2D6 PM/UM)", riskReduction: "79% Lower", alertLevel: "critical" },
 ];
 
 const TRAINED_MODELS = [

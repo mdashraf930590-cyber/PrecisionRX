@@ -15,14 +15,16 @@ import Navbar from "@/components/Navbar";
 
 // ─── Mock Data ────────────────────────────────────────────────────────────
 const MOCK_PATIENTS = [
-  { id: "p1", name: "Margaret Johnson", age: 68, mrn: "MRN-001", risk: 0.89, condition: "Type 2 Diabetes + HTN", status: "critical", adherence: 71 },
-  { id: "p2", name: "Robert Chen", age: 54, mrn: "MRN-002", risk: 0.62, condition: "Atrial Fibrillation", status: "high", adherence: 84 },
-  { id: "p3", name: "Amelia Rodriguez", age: 41, mrn: "MRN-003", risk: 0.38, condition: "Hyperlipidemia", status: "medium", adherence: 93 },
-  { id: "p4", name: "James Thompson", age: 73, mrn: "MRN-004", risk: 0.91, condition: "CKD Stage 3 + Anemia", status: "critical", adherence: 65 },
-  { id: "p5", name: "Sarah Williams", age: 29, mrn: "MRN-005", risk: 0.15, condition: "Hypothyroidism", status: "low", adherence: 97 },
-  { id: "p6", name: "David Kim", age: 61, mrn: "MRN-006", risk: 0.74, condition: "Post-MI Recovery", status: "high", adherence: 79 },
-  { id: "p7", name: "Lisa Anderson", age: 47, mrn: "MRN-007", risk: 0.28, condition: "Depression + Anxiety", status: "low", adherence: 88 },
-  { id: "p8", name: "Michael Davis", age: 58, mrn: "MRN-008", risk: 0.55, condition: "COPD + GERD", status: "medium", adherence: 72 },
+  { id: "p1", name: "Margaret Johnson", age: 68, mrn: "MRN-2024-001", risk: 0.89, condition: "Type 2 Diabetes Mellitus + Essential HTN", status: "critical", adherence: 71 },
+  { id: "p5", name: "Dr. Carlos Mendoza", age: 52, mrn: "MRN-2024-005", risk: 0.85, condition: "MASH / Fatty Liver Disease (F3 Fibrosis)", status: "critical", adherence: 89 },
+  { id: "p7", name: "Patricia Green", age: 46, mrn: "MRN-2024-007", risk: 0.72, condition: "Refractory GERD & Severe Erosive Esophagitis", status: "high", adherence: 94 },
+  { id: "p8", name: "Michael Davis", age: 58, mrn: "MRN-2024-008", risk: 0.93, condition: "Decompensated Hepatic Cirrhosis & Portal HTN", status: "critical", adherence: 76 },
+  { id: "p3", name: "Amelia Rodriguez", age: 41, mrn: "MRN-2024-003", risk: 0.74, condition: "Severe Familial Dyslipidemia & Hypercholesterolemia", status: "high", adherence: 93 },
+  { id: "p4", name: "James Thompson", age: 73, mrn: "MRN-2024-004", risk: 0.91, condition: "Refractory Stage 3B Hypertension + CKD", status: "critical", adherence: 65 },
+  { id: "p9", name: "Elena Rostova", age: 39, mrn: "MRN-2024-009", risk: 0.68, condition: "Class II Severe Obesity (BMI 38.6) + MetSyn", status: "high", adherence: 91 },
+  { id: "p12", name: "Arthur Pendelton", age: 63, mrn: "MRN-2024-012", risk: 0.96, condition: "Acute Drug-Induced Liver Injury (DILI) & Cholestasis", status: "critical", adherence: 88 },
+  { id: "p6", name: "David Kim", age: 61, mrn: "MRN-2024-006", risk: 0.58, condition: "Mixed Atherogenic Dyslipidemia (TG 380)", status: "medium", adherence: 79 },
+  { id: "p2", name: "Robert Chen", age: 54, mrn: "MRN-2024-002", risk: 0.62, condition: "Atrial Fibrillation · Post-PCI Stent", status: "high", adherence: 84 },
 ];
 
 const OUTCOME_DATA = [
