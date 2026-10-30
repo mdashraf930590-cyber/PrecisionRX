@@ -12,11 +12,13 @@ import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
+import app.models.db_models  # noqa: F401 - ensure all ORM models are registered
+from app.core.config import settings
 from app.core.database import Base, get_db
 from app.main import app
 
 # ─── Test Database Setup ──────────────────────────────────────────────────────
-TEST_DB_URL = "postgresql+asyncpg://precisionrx:testpassword@localhost:5432/precisionrx_test"
+TEST_DB_URL = settings.DATABASE_URL
 
 test_engine = create_async_engine(TEST_DB_URL, echo=False)
 TestSessionLocal = async_sessionmaker(test_engine, class_=AsyncSession, expire_on_commit=False)
@@ -54,6 +56,7 @@ async def setup_db():
             await conn.run_sync(Base.metadata.drop_all)
     except Exception:
         pass
+    await test_engine.dispose()
 
 
 @pytest_asyncio.fixture
