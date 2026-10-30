@@ -37,11 +37,23 @@ app.dependency_overrides[get_db] = override_get_db
 
 @pytest_asyncio.fixture(scope="session", autouse=True)
 async def setup_db():
-    async with test_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    import asyncio
+
+    for attempt in range(15):
+        try:
+            async with test_engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
+            break
+        except Exception:
+            if attempt == 14:
+                raise
+            await asyncio.sleep(1)
     yield
-    async with test_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
+    try:
+        async with test_engine.begin() as conn:
+            await conn.run_sync(Base.metadata.drop_all)
+    except Exception:
+        pass
 
 
 @pytest_asyncio.fixture
