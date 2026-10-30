@@ -17,10 +17,12 @@ from app.core.config import settings
 from app.core.database import Base, get_db
 from app.main import app
 
+from sqlalchemy.pool import NullPool
+
 # ─── Test Database Setup ──────────────────────────────────────────────────────
 TEST_DB_URL = settings.DATABASE_URL
 
-test_engine = create_async_engine(TEST_DB_URL, echo=False)
+test_engine = create_async_engine(TEST_DB_URL, echo=False, poolclass=NullPool)
 TestSessionLocal = async_sessionmaker(test_engine, class_=AsyncSession, expire_on_commit=False)
 
 
@@ -124,7 +126,7 @@ class TestAuth:
             json={
                 "email": "login_test@test.com",
                 "password": "Test1234!",
-                "full_name": "T",
+                "full_name": "Test User",
                 "role": "viewer",
             },
         )
